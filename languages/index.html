@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>languages — kalbarchyvas</title>
+  <link rel="stylesheet" href="../style.css">
+  <script src="../js/search.js"></script>
+</head>
+<body>
+
+  <div class="top-bar">
+    <div class="search small-search">
+      <input type="text" placeholder="search any language or family...">
+      <button>go</button>
+    </div>
+  </div>
+
+  <div class="lang-list-page">
+    <h1>languages</h1>
+    
+    <nav class="letter-nav">
+      <a href="#a">A</a> <a href="#b">B</a> <a href="#c">C</a> <a href="#d">D</a> 
+      <a href="#e">E</a> <a href="#f">F</a> <a href="#g">G</a> <a href="#h">H</a> 
+      <a href="#i">I</a> <a href="#j">J</a> <a href="#k">K</a> <a href="#l">L</a> 
+      <a href="#m">M</a> <a href="#n">N</a> <a href="#o">O</a> <a href="#p">P</a> 
+      <a href="#q">Q</a> <a href="#r">R</a> <a href="#s">S</a> <a href="#t">T</a> 
+      <a href="#u">U</a> <a href="#v">V</a> <a href="#w">W</a> <a href="#x">X</a> 
+      <a href="#y">Y</a> <a href="#z">Z</a>
+    </nav>
+
+    <div id="language-list"></div>
+  </div>
+
+  <script>
+    // aggressive normalizer
+    function normalizeForSort(name) {
+      let cleaned = name
+        .replace(/ǂ|‘|’|“|”|ʔ|ʕ|ʡ|ʢ|ʰ|ʷ|ʲ|ˀ|ˁ/g, '')   // remove extra characters
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");               // remove all diacritics
+
+      // keep only letters for sorting
+      cleaned = cleaned.replace(/[^A-Za-z]/g, '');
+      return cleaned.toLowerCase();
+    }
+
+    function getFirstLetter(name) {
+      const norm = normalizeForSort(name);
+      const match = norm.match(/[a-z]/);
+      return match ? match[0].toUpperCase() : "Other";
+    }
+
+    fetch('data.json')
+      .then(r => r.json())
+      .then(data => {
+        const container = document.getElementById('language-list');
+        
+        // sort using cleaned version
+        const sorted = data.languages.sort((a, b) => {
+          return normalizeForSort(a.name).localeCompare(normalizeForSort(b.name));
+        });
+
+        let currentLetter = '';
+        let html = '';
+
+        sorted.forEach((lang, index) => {
+          const letter = getFirstLetter(lang.name);
+          
+          if (letter !== currentLetter) {
+            if (currentLetter) html += '</p>';
+            html += `<h2 id="${letter.toLowerCase()}">${letter}</h2><p>`;
+            currentLetter = letter;
+          } else if (index > 0) {
+            html += ', ';
+          }
+
+          html += `<a href="${lang.link}">${lang.name}</a>`;
+        });
+
+        if (currentLetter) html += '</p>';
+        container.innerHTML = html;
+      });
+  </script>
+
+</body>
+</html>
