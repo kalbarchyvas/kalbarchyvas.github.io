@@ -1,5 +1,6 @@
 {
   "languages": [
-    {"name": "Komi", "link": "komi.html"}
+    {"name": "Komi", "link": "komi.html"},
+    {"name": "Nganasan", "link": "nganasan.html"}
   ]
 }
